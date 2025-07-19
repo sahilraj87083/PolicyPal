@@ -107,7 +107,7 @@ def main():
     
     # --- 5. Run the Chain on an Input File ---
     # Define the path to your input query file (e.g., an email saved as a PDF or Word doc)
-    input_file_path = "queries/sample2PDF.pdf" # <-- THIS IS THE PATH TO THE INPUT FILE
+    input_file_path = "queries/sample6WORDFILE.docx" # <-- THIS IS THE PATH TO THE INPUT FILE
     
     # Check if the file exists before proceeding
     if not os.path.exists(input_file_path):
