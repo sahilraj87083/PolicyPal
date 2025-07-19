@@ -16,6 +16,14 @@ import json
 #  importing function to parese the input query
 from src.data_loader import extract_text_from_file
 from src.llm_handler import get_structuring_chain, get_adjudication_chain
+from langchain_community.document_loaders import UnstructuredEmailLoader
+
+
+import nltk
+# Download the 'punkt' toolkit from NLTK if it's missing
+nltk.download('punkt')
+
+
 
 def main():
     """
@@ -99,7 +107,7 @@ def main():
     
     # --- 5. Run the Chain on an Input File ---
     # Define the path to your input query file (e.g., an email saved as a PDF or Word doc)
-    input_file_path = "queries/sample1.docx" # <-- THIS IS THE PATH TO THE INPUT FILE
+    input_file_path = "queries/sample2PDF.pdf" # <-- THIS IS THE PATH TO THE INPUT FILE
     
     # Check if the file exists before proceeding
     if not os.path.exists(input_file_path):

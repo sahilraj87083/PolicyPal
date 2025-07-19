@@ -1,7 +1,7 @@
 # In src/data_loader.py
 
 import os
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredEmailLoader
 
 def load_all_pdfs(data_folder_path: str):
     """
@@ -53,6 +53,8 @@ def extract_text_from_file(file_path: str):
         loader = PyPDFLoader(file_path)
     elif file_path.endswith(".docx"):
         loader = Docx2txtLoader(file_path)
+    elif file_path.endswith(".eml"):
+        loader = UnstructuredEmailLoader(file_path)
     else:
         # For simplicity, we'll raise an error for unsupported types.
         # You could add email (.eml) or other parsers here.
