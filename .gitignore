@@ -14,3 +14,6 @@ __pycache__/
 # --- macOS Specific ---
 # Ignores custom folder view settings.
 .DS_Store
+
+# Database folder inside data
+data/vector_store_db/
