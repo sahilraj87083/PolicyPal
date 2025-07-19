@@ -31,3 +31,5 @@ def load_all_pdfs(data_folder_path: str):
         print("Warning: No documents were loaded. Check the folder path and PDF files.")
     
     return documents
+
+

@@ -7,6 +7,13 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 
+# Importing the new function and other necessary components for Full Adjudication Workflow
+from src.llm_handler import get_structuring_chain, get_adjudication_chain
+from langchain_core.runnables import RunnablePassthrough
+from operator import itemgetter
+import json
+
+
 def main():
     """
     Main function to run the PolicyPal application.
@@ -74,6 +81,33 @@ def main():
     # For example, you can start asking questions.
     print("\n--- PolicyPal is ready to answer questions ---")
     # (The query logic will go here in the next steps)
+
+    # --- 4. Test the Query Structuring Chain ---
+    print("\n--- Testing the Query Structuring Chain ---")
+
+    # Get the chain from our handler
+    structuring_chain = get_structuring_chain(api_key=token, base_url=endpoint)
+    adjudication_chain = get_adjudication_chain(api_key=token, base_url=endpoint)
+    retriever = vectorstore.as_retriever()
+
+    # Define the full chain using LangChain Expression Language (LCEL)
+    # This pipes the output of one step into the next.
+    full_chain = {
+        "claim_details": structuring_chain,
+        "context": itemgetter("query") | retriever
+    } | adjudication_chain
+
+    # --- 5. Run the Full Chain on a Query ---
+    print("\n--- Running Full Adjudication Chain ---")
+    raw_query = "I have a claim for a 46-year-old male who had knee surgery in Pune. The policy is 3 months old."
+    print(f"Query: {raw_query}\n")
+
+    # Invoke the full chain
+    final_result = full_chain.invoke({"query": raw_query})
+
+    # Print the final structured output
+    print("--- Final Decision ---")
+    print(json.dumps(final_result, indent=2))
 
 
 if __name__ == "__main__":
