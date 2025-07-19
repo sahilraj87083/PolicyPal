@@ -1,0 +1,16 @@
+# --- Virtual Environment ---
+# Prevents uploading hundreds of megabytes of library files.
+.venv/
+
+# --- Secrets ---
+# CRITICAL: Prevents leaking your secret API key.
+.env
+
+# --- Python Cache ---
+# Ignores temporary files created by Python.
+__pycache__/
+*.pyc
+
+# --- macOS Specific ---
+# Ignores custom folder view settings.
+.DS_Store
