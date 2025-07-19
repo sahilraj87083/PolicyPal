@@ -13,6 +13,9 @@ from langchain_core.runnables import RunnablePassthrough
 from operator import itemgetter
 import json
 
+#  importing function to parese the input query
+from src.data_loader import extract_text_from_file
+from src.llm_handler import get_structuring_chain, get_adjudication_chain
 
 def main():
     """
@@ -84,25 +87,32 @@ def main():
 
     # --- 4. Test the Query Structuring Chain ---
     print("\n--- Testing the Query Structuring Chain ---")
-
     # Get the chain from our handler
     structuring_chain = get_structuring_chain(api_key=token, base_url=endpoint)
     adjudication_chain = get_adjudication_chain(api_key=token, base_url=endpoint)
     retriever = vectorstore.as_retriever()
 
-    # Define the full chain using LangChain Expression Language (LCEL)
-    # This pipes the output of one step into the next.
     full_chain = {
         "claim_details": structuring_chain,
         "context": itemgetter("query") | retriever
     } | adjudication_chain
-
-    # --- 5. Run the Full Chain on a Query ---
+    
+    # --- 5. Run the Chain on an Input File ---
+    # Define the path to your input query file (e.g., an email saved as a PDF or Word doc)
+    input_file_path = "queries/sample1.docx" # <-- THIS IS THE PATH TO THE INPUT FILE
+    
+    # Check if the file exists before proceeding
+    if not os.path.exists(input_file_path):
+        print(f"❌ Error: Input file not found at '{input_file_path}'")
+        return
+        
+    # Extract text from the file to use as the query
+    raw_query = extract_text_from_file(input_file_path)
+    
     print("\n--- Running Full Adjudication Chain ---")
-    raw_query = "I have a claim for a 46-year-old male who had knee surgery in Pune. The policy is 3 months old."
-    print(f"Query: {raw_query}\n")
+    print(f"Query (from file): {raw_query[:500]}...\n") # Print first 500 chars
 
-    # Invoke the full chain
+    # Invoke the full chain with the extracted text
     final_result = full_chain.invoke({"query": raw_query})
 
     # Print the final structured output

@@ -33,3 +33,33 @@ def load_all_pdfs(data_folder_path: str):
     return documents
 
 
+# for reading the input files
+
+from langchain_community.document_loaders import Docx2txtLoader
+
+def extract_text_from_file(file_path: str):
+    """
+    Extracts text content from a given file (PDF or DOCX).
+    
+    Args:
+        file_path: The path to the file.
+
+    Returns:
+        The extracted text content as a single string.
+    """
+    print(f"\n--- Extracting text from query file: {os.path.basename(file_path)} ---")
+    
+    if file_path.endswith(".pdf"):
+        loader = PyPDFLoader(file_path)
+    elif file_path.endswith(".docx"):
+        loader = Docx2txtLoader(file_path)
+    else:
+        # For simplicity, we'll raise an error for unsupported types.
+        # You could add email (.eml) or other parsers here.
+        raise ValueError(f"Unsupported file type: {file_path}")
+
+    # Load the document (it returns a list of pages/documents)
+    docs = loader.load()
+    
+    # Join the content of all pages into a single string
+    return "\n".join(doc.page_content for doc in docs)

@@ -17,3 +17,6 @@ __pycache__/
 
 # Database folder inside data
 data/vector_store_db/
+
+# Query files folder
+queries/
