@@ -14,9 +14,13 @@ from operator import itemgetter
 import json
 
 #  importing function to parese the input query
+from langchain_openai import ChatOpenAI
 from src.data_loader import extract_text_from_file
 from src.llm_handler import get_structuring_chain, get_adjudication_chain
 from langchain_community.document_loaders import UnstructuredEmailLoader
+
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import LLMChainExtractor
 
 
 import nltk
@@ -53,6 +57,8 @@ def main():
         model="text-embedding-3-small",
         chunk_size=32
     )
+
+    llm = ChatOpenAI(model="openai/gpt-4o", api_key=token, base_url=endpoint, temperature=0.0)
 
     # --- 2. Vector Store Management ---
     # Check if the vector store already exists on disk
@@ -91,22 +97,39 @@ def main():
     # you can build the rest of your application here.
     # For example, you can start asking questions.
     print("\n--- PolicyPal is ready to answer questions ---")
-    # (The query logic will go here in the next steps)
+    
+
+    # better retrieval system => NOT USING because our  API key has a limit of 10 requests per minute
+    print("Setting up advanced retriever with contextual compression...")
+    base_retriever = vectorstore.as_retriever()
+    compressor = LLMChainExtractor.from_llm(llm)
+    compression_retriever = ContextualCompressionRetriever(
+        base_compressor=compressor, base_retriever=base_retriever
+    )
+    
 
     # --- 4. Test the Query Structuring Chain ---
     print("\n--- Testing the Query Structuring Chain ---")
-    # Get the chain from our handler
+    # Get the chain from our handler and Define the Full Adjudication Workflow
     structuring_chain = get_structuring_chain(api_key=token, base_url=endpoint)
     adjudication_chain = get_adjudication_chain(api_key=token, base_url=endpoint)
-    retriever = vectorstore.as_retriever()
+    # retriever = vectorstore.as_retriever()
+
+    # full_chain = {
+    #     "claim_details": structuring_chain,
+    #     "context": itemgetter("query") | retriever
+    # } | adjudication_chain
+
 
     full_chain = {
         "claim_details": structuring_chain,
-        "context": itemgetter("query") | retriever
+        # Use the new compression retriever here
+        "context": itemgetter("query") | compression_retriever 
     } | adjudication_chain
     
     # --- 5. Run the Chain on an Input File ---
     # Define the path to your input query file (e.g., an email saved as a PDF or Word doc)
+
     input_file_path = "queries/sample8HTML.html" # <-- THIS IS THE PATH TO THE INPUT FILE
     
     # Check if the file exists before proceeding
