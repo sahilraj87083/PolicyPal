@@ -1,7 +1,7 @@
 # In src/data_loader.py
 
 import os
-from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredEmailLoader
+from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, UnstructuredEmailLoader , TextLoader , UnstructuredHTMLLoader
 
 def load_all_pdfs(data_folder_path: str):
     """
@@ -35,11 +35,10 @@ def load_all_pdfs(data_folder_path: str):
 
 # for reading the input files
 
-from langchain_community.document_loaders import Docx2txtLoader
 
 def extract_text_from_file(file_path: str):
     """
-    Extracts text content from a given file (PDF or DOCX).
+    Extracts text content from a given file (PDF, DOCX, EML, TXT, or HTML).
     
     Args:
         file_path: The path to the file.
@@ -55,6 +54,10 @@ def extract_text_from_file(file_path: str):
         loader = Docx2txtLoader(file_path)
     elif file_path.endswith(".eml"):
         loader = UnstructuredEmailLoader(file_path)
+    elif file_path.endswith(".txt"):
+        loader = TextLoader(file_path)
+    elif file_path.endswith((".html", ".htm")):
+        loader = UnstructuredHTMLLoader(file_path) 
     else:
         # For simplicity, we'll raise an error for unsupported types.
         # You could add email (.eml) or other parsers here.
